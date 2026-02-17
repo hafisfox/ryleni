@@ -1,6 +1,6 @@
 import { ContactFormData } from '../types';
 
-const WEBHOOK_URL = 'https://n8n.srv1046139.hstgr.cloud/webhook-test/ryleni-form';
+const WEBHOOK_URL = 'https://n8n.srv1046139.hstgr.cloud/webhook/ryleni-form';
 
 export const submitContactForm = async (data: ContactFormData): Promise<void> => {
   try {
