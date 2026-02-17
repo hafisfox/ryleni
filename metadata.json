@@ -1,0 +1,5 @@
+{
+  "name": "Ryleni Form",
+  "description": "A beautifully designed contact form featuring glassmorphism UI, real-time validation, and direct integration with a custom webhook endpoint.",
+  "requestFramePermissions": []
+}
