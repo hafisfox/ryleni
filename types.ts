@@ -11,6 +11,8 @@ export interface ContactFormData {
   stage: string;
   teamSize: string;
   pitchDeckUrl: string;
+  pitchDeckFileName?: string;
+  pitchDeckFileContent?: string;
 }
 
 export enum FormStatus {

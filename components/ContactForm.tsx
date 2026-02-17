@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link2, FileText, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Link2, FileText, CheckCircle2, AlertCircle, Loader2, X, UploadCloud } from 'lucide-react';
 import { ContactFormData, FormStatus } from '../types';
 import { submitContactForm } from '../services/webhook';
 import Input from './Input';
@@ -24,6 +24,8 @@ const TEAM_SIZE_OPTIONS = [
 ];
 
 const ContactForm: React.FC = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -35,6 +37,8 @@ const ContactForm: React.FC = () => {
     stage: '',
     teamSize: '',
     pitchDeckUrl: '',
+    pitchDeckFileName: '',
+    pitchDeckFileContent: '',
   });
 
   const [pitchType, setPitchType] = useState<'url' | 'file'>('url');
@@ -47,6 +51,53 @@ const ContactForm: React.FC = () => {
     if (status === FormStatus.ERROR) setStatus(FormStatus.IDLE);
   };
 
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
+        setErrorMessage("File size must be less than 10MB");
+        setStatus(FormStatus.ERROR);
+        return;
+      }
+
+      if (file.type !== 'application/pdf') {
+        setErrorMessage("Only PDF files are allowed");
+        setStatus(FormStatus.ERROR);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          pitchDeckFileName: file.name,
+          pitchDeckFileContent: reader.result as string,
+          pitchDeckUrl: '' // Clear URL when file is present
+        }));
+        setStatus(FormStatus.IDLE);
+        setErrorMessage('');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFormData(prev => ({
+      ...prev,
+      pitchDeckFileName: '',
+      pitchDeckFileContent: ''
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const validate = (): boolean => {
     if (!formData.firstName.trim()) return false;
     if (!formData.lastName.trim()) return false;
@@ -57,9 +108,11 @@ const ContactForm: React.FC = () => {
     if (!formData.stage) return false;
     if (!formData.teamSize) return false;
     
-    // Only validate pitch deck URL if that mode is selected, 
-    // but for this demo assuming URL is primary
-    if (pitchType === 'url' && !formData.pitchDeckUrl.trim()) return false;
+    if (pitchType === 'url') {
+      if (!formData.pitchDeckUrl.trim()) return false;
+    } else {
+      if (!formData.pitchDeckFileName) return false;
+    }
 
     return true;
   };
@@ -90,7 +143,11 @@ const ContactForm: React.FC = () => {
         stage: '',
         teamSize: '',
         pitchDeckUrl: '',
+        pitchDeckFileName: '',
+        pitchDeckFileContent: '',
       });
+      setPitchType('url');
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
       setStatus(FormStatus.ERROR);
       setErrorMessage("We couldn't submit your application. Please try again.");
@@ -276,10 +333,47 @@ const ContactForm: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center bg-white cursor-pointer hover:bg-slate-50 transition-colors">
-                    <p className="text-sm text-slate-500">Click or drag file to upload</p>
-                    <p className="text-xs text-slate-400 mt-1">PDF up to 10MB</p>
-                  </div>
+                  <>
+                    <input 
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="application/pdf"
+                      className="hidden"
+                    />
+                    
+                    {!formData.pitchDeckFileName ? (
+                      <div 
+                        onClick={handleFileClick}
+                        className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center bg-white cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-all group"
+                      >
+                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-500 group-hover:scale-110 transition-transform">
+                          <UploadCloud className="w-5 h-5" />
+                        </div>
+                        <p className="text-sm text-slate-700 font-medium">Click to upload PDF</p>
+                        <p className="text-xs text-slate-400 mt-1">Maximum file size 10MB</p>
+                      </div>
+                    ) : (
+                      <div className="border border-blue-200 bg-blue-50/50 rounded-lg p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="w-10 h-10 bg-white border border-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 text-red-500">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-700 truncate">{formData.pitchDeckFileName}</p>
+                            <p className="text-xs text-slate-500">Ready to submit</p>
+                          </div>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={removeFile}
+                          className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-md transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
