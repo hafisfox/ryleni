@@ -12,7 +12,7 @@ export interface ContactFormData {
   teamSize: string;
   pitchDeckUrl: string;
   pitchDeckFileName?: string;
-  pitchDeckFileContent?: string;
+  pitchDeckFile?: File;
 }
 
 export enum FormStatus {

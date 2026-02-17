@@ -38,7 +38,7 @@ const ContactForm: React.FC = () => {
     teamSize: '',
     pitchDeckUrl: '',
     pitchDeckFileName: '',
-    pitchDeckFileContent: '',
+    pitchDeckFile: undefined,
   });
 
   const [pitchType, setPitchType] = useState<'url' | 'file'>('url');
@@ -71,18 +71,15 @@ const ContactForm: React.FC = () => {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          pitchDeckFileName: file.name,
-          pitchDeckFileContent: reader.result as string,
-          pitchDeckUrl: '' // Clear URL when file is present
-        }));
-        setStatus(FormStatus.IDLE);
-        setErrorMessage('');
-      };
-      reader.readAsDataURL(file);
+      // Store the file object directly
+      setFormData(prev => ({
+        ...prev,
+        pitchDeckFileName: file.name,
+        pitchDeckFile: file,
+        pitchDeckUrl: '' // Clear URL when file is present
+      }));
+      setStatus(FormStatus.IDLE);
+      setErrorMessage('');
     }
   };
 
@@ -91,7 +88,7 @@ const ContactForm: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       pitchDeckFileName: '',
-      pitchDeckFileContent: ''
+      pitchDeckFile: undefined
     }));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -144,7 +141,7 @@ const ContactForm: React.FC = () => {
         teamSize: '',
         pitchDeckUrl: '',
         pitchDeckFileName: '',
-        pitchDeckFileContent: '',
+        pitchDeckFile: undefined,
       });
       setPitchType('url');
       if (fileInputRef.current) fileInputRef.current.value = '';
