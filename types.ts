@@ -7,12 +7,36 @@ export interface ContactFormData {
   phone: string;
   companyName: string;
   website: string;
+  industry: string;
   oneLinePitch: string;
   stage: string;
   teamSize: string;
+  founderSetup: string;
   pitchDeckUrl: string;
   pitchDeckFileName?: string;
   pitchDeckFile?: File;
+  isIncorporated: string;
+  incorporationYear: string;
+  roc: string;
+  companyPan: string;
+  tan: string;
+  cinNumber?: string;
+  gstNumber?: string;
+  incorporationCertificateFileName?: string;
+  incorporationCertificateFile?: File;
+  msmeCertificateFileName?: string;
+  msmeCertificateFile?: File;
+  hasMvp: string;
+  appLink?: string;
+  businessModelFileName?: string;
+  businessModelFile?: File;
+  revenueModelFileName?: string;
+  revenueModelFile?: File;
+  activeCompliances: string[];
+  isGeneratingRevenue: string;
+  currentRevenue?: string;
+  pnlStatementFileName?: string;
+  pnlStatementFile?: File;
 }
 
 export enum FormStatus {
